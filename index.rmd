@@ -257,7 +257,7 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 ## row{data-width=990}
 ### Rounds
 ```{r}
-month_week_totals_dt
+main_dt
 ```
 # Month_weeks
 ## row{.tabset}
@@ -293,4 +293,5 @@ pairs_totals_chart
 ```{r}
 timeranges_totals_dt
 ```
+
 
