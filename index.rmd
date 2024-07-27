@@ -2,8 +2,7 @@
 title: "Trade_Report"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
-    vertical_layout: fill
+    
 ---
 
 ```{r setup, include=FALSE}
@@ -260,7 +259,7 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 main_dt
 ```
 # Month_weeks
-## row{.tabset}
+## column{.tabset}
 ### Week_Profits 
 ```{r}
 month_week_totals_dt
@@ -278,11 +277,12 @@ ggplotly(daily_total_trades_chart,width = 1000)
 ```
 
 # Currencies
-### Table
+## column{data-hight=500}
+### Pairs
 ```{r}
 pairs_totals_dt
 ```
-
+## column{data-hight=500}
 ### Chart
 ```{r}
 pairs_totals_chart
