@@ -219,12 +219,6 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 
 # Main
 ## row{data-width=10}
-### Rounds
-```{r}
-valueBox(value = nrow(main),caption = "Rounds",color = "#b2bec3")
-```
-
-
 ### profits
 ```{r}
 valueBox(value =sum(qx$net) ,caption =" Profits" ,color ="#b2bec3" )
