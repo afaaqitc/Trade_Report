@@ -91,19 +91,21 @@ qx<-
 #main 
 
 main<-
-qx %>% group_by(Rounds) %>% 
+qx %>% group_by(Rounds,date) %>% summarize(n()) %>% 
+group_by(Rounds) %>% summarize(Trade_Days=n()) %>% 
+inner_join(qx,by="Rounds") %>%group_by(Rounds,Trade_Days) %>% 
 summarize(trades=n(),gain_n=sum(gain_n),loss_n=sum(loss_n),profits =sum(net)) %>% 
 inner_join(wallet,by="Rounds") %>% 
 mutate(pct =profits/amount)  %>%mutate(performance=
 ifelse(gain_n/trades<0.5,(loss_n/trades)*-1,gain_n/trades)) %>% 
-select(c(1,6,5,7,2,3,4,8))
+select(c(1,2,7,6,8,3,4,5,9))
 
 
 main_dt<-
-main %>% datatable(class = "hover cell-borders",
+main %>% adorn_totals("row")%>%  datatable(class = "hover cell-borders strip ",
 extensions =list(Buttons=TRUE) ,options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"))) %>% 
-formatPercentage(columns = c(4,8),digits = 2) %>% 
-formatCurrency(columns = c(2,3),digits = 2)
+formatPercentage(columns = c(5,9),digits = 2) %>% 
+formatCurrency(columns = c(4,3),digits = 2)
 
 
 #month_week_totals
@@ -121,7 +123,7 @@ select(Rounds,month_week,Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Frida
 
 month_week_totals_dt<-
 month_week_totals %>% 
-datatable(class = "hover cells-border strip",
+datatable(class = "hover cell-borders strip",
 extensions = list(Buttons=TRUE,RowGroup=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 rowGroup=list(dataSrc=1),
@@ -140,7 +142,7 @@ arrange(date,by_group=FALSE) %>% select(-9)
 
 
 daily_total_trades_dt<-
-daily_total_trades %>% datatable(filter = "top",class = "hover cells-border strip",
+daily_total_trades %>% datatable(filter = "top",class = "hover cell-border strip",
 extensions = list(Buttons=TRUE,RowGroup=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),rowGroup=list(dataSrc=1),
 columnDefs=list(list(className="dt-center",targets=1:9),list(visible=FALSE,targets=1)))) %>% 
@@ -194,7 +196,7 @@ Profits=sum(net),PCT=sum(net)/sum(qx$net))
 
 timeranges_totals_dt<-
 timeranges_totals %>% adorn_totals("row") %>%
-datatable(class="hover cell-borders strip",extensions = list(Buttons=TRUE),
+datatable(class="hover cell-border strip",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
 formatPercentage(columns = c(5,7),digits = 2) %>% formatCurrency(columns = 6,digits = 2)
@@ -219,21 +221,6 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 
 # Main
 ## row{data-width=10}
-### profits
-```{r}
-valueBox(value =sum(qx$net) ,caption =" Profits" ,color ="#b2bec3" )
-```
-### trades
-```{r}
-valueBox(value =sum(main$trades) ,caption ="Trades" ,color = "#b2bec3"  )
-```
-
-
-### days
-```{r}
-valueBox(value =nrow(daily_total_trades) ,caption ="Days" ,color = "#b2bec3")
-```
-
 ### Gain_Trades
 ```{r}
 gauge(value =pctg ,min =0 ,max =100 ,sectors = gaugeSectors(success =c(55,70) ,warning = c(40,50),danger =c(25,35) ,colors = "darkgreen"),symbol = "%",label = "Gain Trades")
@@ -243,8 +230,6 @@ gauge(value =pctg ,min =0 ,max =100 ,sectors = gaugeSectors(success =c(55,70) ,w
 ```{r}
 gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25),warning =c(-30,-45) ,danger =c(-50,-60) ,colors ="red" ) ,symbol = "%",label = "Loss Trades")
 ```
-
-
 
 
 ## row{data-width=990}
