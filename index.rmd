@@ -102,7 +102,7 @@ select(c(1,2,7,6,8,3,4,5,9))
 
 
 main_dt<-
-main %>% adorn_totals("row")%>%  datatable(class = "hover cell-borders strip ",
+main %>% adorn_totals("row")%>%  datatable(class = "hover row-border strip ",
 extensions =list(Buttons=TRUE) ,options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"))) %>% 
 formatPercentage(columns = c(5,9),digits = 2) %>% 
 formatCurrency(columns = c(4,3),digits = 2)
@@ -123,7 +123,7 @@ select(Rounds,month_week,Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Frida
 
 month_week_totals_dt<-
 month_week_totals %>% 
-datatable(class = "hover cell-borders strip",
+datatable(class = "hover row-border",
 extensions = list(Buttons=TRUE,RowGroup=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 rowGroup=list(dataSrc=1),
@@ -142,7 +142,7 @@ arrange(date,by_group=FALSE) %>% select(-9)
 
 
 daily_total_trades_dt<-
-daily_total_trades %>% datatable(filter = "top",class = "hover cell-border strip",
+daily_total_trades %>% datatable(filter = "top",class = "hover row-border ",
 extensions = list(Buttons=TRUE,RowGroup=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),rowGroup=list(dataSrc=1),
 columnDefs=list(list(className="dt-center",targets=1:9),list(visible=FALSE,targets=1)))) %>% 
@@ -173,7 +173,7 @@ Profits=sum(net),PCT=sum(net)/sum(qx$net))
 
 pairs_totals_dt<-  
 pairs_totals %>%adorn_totals("row") %>%
-datatable(class="hover cell-border strip",
+datatable(class="hover row-border ",
 extensions = list(Buttons=TRUE),options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
 formatPercentage(columns =c(5,7),digits = 2) %>% formatCurrency(columns = 6,digits = 2) 
@@ -196,7 +196,7 @@ Profits=sum(net),PCT=sum(net)/sum(qx$net))
 
 timeranges_totals_dt<-
 timeranges_totals %>% adorn_totals("row") %>%
-datatable(class="hover cell-border strip",extensions = list(Buttons=TRUE),
+datatable(class="hover row-border",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
 formatPercentage(columns = c(5,7),digits = 2) %>% formatCurrency(columns = 6,digits = 2)
@@ -220,7 +220,7 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 ```
 
 # Main
-## row{data-width=10}
+## row{data-width=200}
 ### Gain_Trades
 ```{r}
 gauge(value =pctg ,min =0 ,max =100 ,sectors = gaugeSectors(success =c(55,70) ,warning = c(40,50),danger =c(25,35) ,colors = "darkgreen"),symbol = "%",label = "Gain Trades")
@@ -232,7 +232,7 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 ```
 
 
-## row{data-width=990}
+## row{data-width=800}
 ### Rounds
 ```{r}
 main_dt
