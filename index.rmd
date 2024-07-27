@@ -220,7 +220,14 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 ```
 
 # Main
-## row{data-width=200}
+## column{data-width=10}
+
+### Profits
+```{r}
+valueBox(value =sum(qx$net) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#feca57" )
+```
+
+
 ### Gain_Trades
 ```{r}
 gauge(value =pctg ,min =0 ,max =100 ,sectors = gaugeSectors(success =c(55,70) ,warning = c(40,50),danger =c(25,35) ,colors = "darkgreen"),symbol = "%",label = "Gain Trades")
@@ -232,7 +239,7 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 ```
 
 
-## row{data-width=800}
+## column{data-width=990}
 ### Rounds
 ```{r}
 main_dt
