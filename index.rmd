@@ -224,12 +224,12 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 
 ### Profits
 ```{r}
-valueBox(value =sum(qx$net) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#feca57" )
+valueBox(value =sum(qx$net) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#f1f2f6" )
 ```
 
 ### Days
 ```{r}
-valueBox(value =sum(main$Trade_Days) ,caption = "Days",icon = "fa fa-calendar",color = "#feca57")
+valueBox(value =sum(main$Trade_Days) ,caption = "Days",icon = "fa fa-calendar",color = "#f1f2f6")
 ```
 
 ### Gain_Trades
