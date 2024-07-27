@@ -221,23 +221,23 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 ## row{data-width=10}
 ### Rounds
 ```{r}
-valueBox(value = nrow(main),caption = "Rounds",icon ="fa fa-certificate"  ,color = "#b2bec3")
+valueBox(value = nrow(main),caption = "Rounds",color = "#b2bec3")
 ```
 
 
 ### profits
 ```{r}
-valueBox(value =sum(qx$net) ,caption =" Profits",icon ="fa fa-money" ,color ="#b2bec3" )
+valueBox(value =sum(qx$net) ,caption =" Profits" ,color ="#b2bec3" )
 ```
 ### trades
 ```{r}
-valueBox(value =sum(main$trades) ,caption ="Trades" ,color = "#b2bec3",icon ="fa fa-line-chart"  )
+valueBox(value =sum(main$trades) ,caption ="Trades" ,color = "#b2bec3"  )
 ```
 
 
 ### days
 ```{r}
-valueBox(value =nrow(daily_total_trades) ,caption ="Days" ,icon ="fa fa-calendar" ,color = "#b2bec3")
+valueBox(value =nrow(daily_total_trades) ,caption ="Days" ,color = "#b2bec3")
 ```
 
 ### Gain_Trades
