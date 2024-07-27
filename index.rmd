@@ -219,8 +219,13 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 ```
 
 # Main
-
 ## row{data-width=10}
+### Rounds
+```{r}
+valueBox(value = nrow(main),caption = "Rounds",icon ="fa fa-certificate"  ,color = "#b2bec3")
+```
+
+
 ### profits
 ```{r}
 valueBox(value =sum(qx$net) ,caption =" Profits",icon ="fa fa-money" ,color ="#b2bec3" )
@@ -252,7 +257,7 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 ## row{data-width=990}
 ### Rounds
 ```{r}
-main_dt
+month_week_totals_dt
 ```
 # Month_weeks
 ## row{.tabset}
