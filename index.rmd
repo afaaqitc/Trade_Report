@@ -2,7 +2,7 @@
 title: "Trade_Report"
 output: 
   flexdashboard::flex_dashboard:
-    
+  orientation: rows
 ---
 
 ```{r setup, include=FALSE}
@@ -130,7 +130,7 @@ columnDefs=list(list(className="dt-center",targets=1:11),list(visible=FALSE,targ
 formatCurrency(columns = c(3:10),digits = 2) %>% formatPercentage(columns =11 ,digits = 2)
 
 month_week_totals_chart<-
-qx %>% group_by(weekn,months) %>% summarize(pr=round(sum(net),2)) %>% ggplot(aes(paste0(weekn,"-",months),pr,fill=paste0(weekn,"-",months)))+geom_bar(stat = "identity")+geom_text(aes(label=pr),size=4.5,color="white",position = position_stack(vjust = 0.8))+labs(x="",y="")+theme_bw()+theme(axis.text.x = element_text(face = "bold",colour = "black",size = 10),axis.text.y = element_text(face = "bold",colour = "black",size = 10),legend.position = "none")+scale_fill_brewer(palette = "Set1")
+qx %>% group_by(weekn,months) %>% summarize(pr=round(sum(net),2)) %>% ggplot(aes(paste0(weekn,"-",months),pr,fill=paste0(weekn,"-",months)))+geom_bar(stat = "identity")+geom_text(aes(label=pr),size=4.5,color="white",position = position_stack(vjust = 0.8))+labs(x="",y="")+theme_bw()+theme(axis.text.x = element_text(face = "bold",colour = "black",size = 10),axis.text.y = element_text(face = "bold",colour = "black",size = 10),legend.position = "none")+scale_fill_brewer(palette = "Set1")+geom_smooth(method = "lm",se = FALSE)
 
 #----------------------------------------------------------------------------------------
 daily_total_trades<-
@@ -220,7 +220,6 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 
 # Main
 ## column{data-width=10}
-
 ### Profits
 ```{r}
 valueBox(value =sum(qx$net) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#f1f2f6" )
@@ -242,18 +241,19 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 ```
 
 
-## column{data-width=990}
+## column{data-width=910}
 ### Rounds
 ```{r}
 main_dt
 ```
 # Month_weeks
-## column{.tabset}
+## row{.tabset}
 ### Week_Profits 
 ```{r}
 month_week_totals_dt
 ```
-### Weeks
+
+### chart
 ```{r}
 ggplotly(month_week_totals_chart,width=1000)
 ```
@@ -270,12 +270,12 @@ ggplotly(daily_total_trades_chart,width = 1000)
 ```
 
 # Currencies
-## column{data-hight=500}
+## row{data-width=650}
 ### Pairs
 ```{r}
 pairs_totals_dt
 ```
-## column{data-hight=500}
+## row{data-width=350}
 ### Chart
 ```{r}
 pairs_totals_chart
