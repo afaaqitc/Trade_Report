@@ -246,7 +246,7 @@ main_dt
 ## row{.tabset}
 ### Week_Profits 
 ```{r}
-
+month_week_totals_dt
 ```
 
 ### Weeks_chart
