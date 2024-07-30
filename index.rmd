@@ -2,7 +2,8 @@
 title: "Trade_Report"
 output: 
   flexdashboard::flex_dashboard:
-  orientation: rows
+    orientation: rows
+    vertical_layout: fill
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +24,7 @@ library(plotly)
 library(readxl)
 library(openxlsx)
 library(readODS)
-
+library(formattable)
 setwd(dir = "//home//jmachiine//Data//Learn//R_Projects//Trade_Report")
 
 wallet<-read_ods("waller.ods")
@@ -57,7 +58,7 @@ minuts=  minute((as.POSIXct(opendate))),monthn=month(opendate))%>%
 mutate(hours=case_when(hours==0 ~ 24,TRUE ~ hours))%>% 
 mutate(time_ranges=case_when(hours >=9 & hours <15 ~ "9AM-15PM",
 hours >= 15 & hours <21 ~ "15PM-21Pm",
-hours >=21 & hours<=24 ~ "21PM-3Am",
+hours >=21 & hours<=24 ~ "21PM-3AM",
 hours>=1 & hours<3 ~ "21PM-3AM",TRUE ~ "3AM-9AM"),
 days=weekdays(as.Date(opendate))) %>% 
 select(- c(ID,opendate,closedate,closeprice,openprice)) 
@@ -187,27 +188,17 @@ scale_fill_brewer(palette = "Set1")
 #----------------------------------------------------------------------------------------
   
 timeranges_totals<- 
-qx %>% group_by(time_ranges) %>%
-summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),
-performance=ifelse(sum(gain_n)/n()<0.5,(sum(loss_n)/n())*-1,sum(gain_n)/n()),
-Profits=sum(net),PCT=sum(net)/sum(qx$net))
+qx %>% group_by(time_ranges) %>% summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),Performance=round(ifelse((sum(gain_n)/n())>0.5,(sum(gain_n)/n())*100,(sum(loss_n)/n())*100),2),Profits=round(sum(net),2))
 
 timeranges_totals_dt<-
-timeranges_totals %>% adorn_totals("row") %>%
+timeranges_totals %>%
 datatable(class="hover row-border strip",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
-formatPercentage(columns = c(5,7),digits = 2) %>% formatCurrency(columns = 6,digits = 2)
+formatCurrency(columns = 5,digits = 2)
 
-timeranges_totals_chart<-
-timeranges_totals %>% ggplot(aes(x=time_ranges,y=Profits,fill=time_ranges))+
-geom_bar(stat = "identity")+
-geom_text(aes(label=Profits),size=3.4,color="black",position = position_stack(vjust = 1.02))+
-theme_bw()+theme(axis.text.x = element_text(colour = "black",face = "bold"),
-axis.text.y = element_text(colour = "black",face = "bold"),
-title = element_text(face = "bold",colour = "steelblue",size = 10))+
-coord_flip()+scale_fill_brewer(palette = "Set1")+labs(x="",y="",
-title = "Time Ranges Total Profits",subtitle =paste("Totals",sum(qx$net),sep = ": ") )
+timeranges_totals_chart<- 
+timeranges_totals %>% ggplot(aes(x="",y=Profits,fill=time_ranges))+geom_bar(stat = "identity")+coord_polar(theta = "y")+theme_void()+geom_text(aes(label=Profits),size=4,color="white",position = position_stack(vjust =0.5),fontface = "bold")+scale_fill_brewer(palette = "Set1")
 
 #----------------------------------------------------------------------------------------
   
@@ -218,16 +209,21 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 
 ```
 
+
 # Main
-## column{data-width=10}
+## row{data-width=10}
 ### Profits
 ```{r}
-valueBox(value =sum(qx$net) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#f1f2f6" )
+valueBox(value =round(sum(qx$net),2) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#a4b0be" )
 ```
 
 ### Days
 ```{r}
-valueBox(value =sum(main$days) ,caption = "Days",icon = "fa fa-calendar",color = "#f1f2f6")
+valueBox(value =sum(main$days) ,caption = "Days",icon = "fa fa-calendar",color = "#a4b0be")
+```
+### Trades
+```{r}
+valueBox(value =nrow(qx) ,caption = "Trades",icon = "fa fa-bar-chart" ,color = "#a4b0be")
 ```
 
 ### Gain_Trades
@@ -241,11 +237,12 @@ gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25)
 ```
 
 
-## column{data-width=910}
+## row{data-hight=990}
 ### Rounds
 ```{r}
 main_dt
 ```
+
 # Month_weeks
 ## row{.tabset}
 ### Week_Profits 
@@ -253,14 +250,14 @@ main_dt
 month_week_totals_dt
 ```
 
-### chart
+### Weeks_chart
 ```{r}
 ggplotly(month_week_totals_chart,width=1000)
 ```
  
 ### Daily_Profits 
 ```{r}
-daily_total_trades_dt
+ daily_total_trades_dt
 ```
 
  
@@ -270,21 +267,27 @@ ggplotly(daily_total_trades_chart,width = 1000)
 ```
 
 # Currencies
-## row{data-width=650}
+## row{data-hight=600,.tabset}
 ### Pairs
 ```{r}
 pairs_totals_dt
 ```
-## row{data-width=350}
+
 ### Chart
 ```{r}
 pairs_totals_chart
 ```
 
 # Time_Ranges
+## row{data-hight=600,.tabset}
 ### Table
 ```{r}
 timeranges_totals_dt
 ```
 
+
+### Chart
+```{r}
+timeranges_totals_chart
+```
 
