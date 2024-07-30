@@ -164,8 +164,7 @@ theme(axis.text.x = element_text(face = "bold",size = 9,color="black",angle = 90
 axis.text.y = element_text(face = "bold",size = 9,color="black"))
 
 #----------------------------------------------------------------------------------------
-pairs_totals<-
-qx %>% group_by(pairs) %>% summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),
+pairs_totals<-qx %>% group_by(pairs) %>% summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),
 performance=ifelse(sum(gain_n)/n()<0.5,(sum(loss_n)/n())*-1,sum(gain_n)/n()),
 Profits=sum(net),PCT=sum(net)/sum(qx$net)) 
 
@@ -194,8 +193,8 @@ timeranges_totals_dt<-
 timeranges_totals %>%
 datatable(class="hover row-border strip",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
-columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
-formatCurrency(columns = 5,digits = 2)
+columnDefs=list(list(className="dt-center",targets=1:6)))) %>% 
+formatCurrency(columns = 6,digits = 2)
 
 timeranges_totals_chart<- 
 timeranges_totals %>% ggplot(aes(x="",y=Profits,fill=time_ranges))+geom_bar(stat = "identity")+coord_polar(theta = "y")+theme_void()+geom_text(aes(label=Profits),size=4,color="white",position = position_stack(vjust =0.5),fontface = "bold")+scale_fill_brewer(palette = "Set1")
@@ -247,7 +246,7 @@ main_dt
 ## row{.tabset}
 ### Week_Profits 
 ```{r}
-month_week_totals_dt
+
 ```
 
 ### Weeks_chart
