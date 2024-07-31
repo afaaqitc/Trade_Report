@@ -57,7 +57,7 @@ qx<-
   mutate(hours=case_when(hours==0 ~ 24,TRUE ~ hours))%>% 
   mutate(time_ranges=case_when(hours >=9 & hours <15 ~ "9AM-15PM",
                                hours >= 15 & hours <21 ~ "15PM-21Pm",
-                               hours >=21 & hours<=24 ~ "21PM-3Am",
+                               hours >=21 & hours<=24 ~ "21PM-3AM",
                                hours>=1 & hours<3 ~ "21PM-3AM",TRUE ~ "3AM-9AM"),
          days=weekdays(as.Date(opendate))) %>% 
   select(- c(ID,opendate,closedate,closeprice,openprice)) 
