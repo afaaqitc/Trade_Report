@@ -137,7 +137,7 @@ month_week_totals_dt<-
 
 
 month_week_totals_chart<-
-qx %>% group_by(weekn,months) %>% summarize(pr=round(sum(net),2)) %>% ggplot(aes(paste0(weekn,"-",months),pr,fill=paste0(weekn,"-",months)))+geom_bar(stat = "identity")+geom_text(aes(label=pr),size=4.5,color="white",position = position_stack(vjust = 0.8))+labs(x="",y="")+theme_bw()+theme(axis.text.x = element_text(face = "bold",colour = "black",size = 10),axis.text.y = element_text(face = "bold",colour = "black",size = 10),legend.position = "none")+scale_fill_brewer(palette = "Set1")+geom_smooth(method = "lm",se = FALSE)
+qx %>% group_by(weekn,months) %>% summarize(pr=round(sum(net),2)) %>% ggplot(aes(paste0(weekn,"-",months),pr,fill=paste0(weekn,"-",months)))+geom_bar(stat = "identity")+geom_text(aes(label=pr),size=4.5,color="black",position = position_stack(vjust = 0.8))+labs(x="",y="")+theme_bw()+theme(axis.text.x = element_text(face = "bold",colour = "black",size = 10),axis.text.y = element_text(face = "bold",colour = "black",size = 10),legend.position = "none")+scale_fill_brewer(palette = "Set1")+geom_smooth(method = "lm",se = FALSE)
 
 
 #----------------------------------------------------------------------------------------
