@@ -33,8 +33,8 @@ countries<-read.xlsx("currency_countries.xlsx")
 qx<-read_xls("qx.xls")
 
 qx<-
-  qx %>%rename(info="معلومات",profit="الربح",opendate="وقت الفتح",openprice="سعر الافتتاح",closedate="وقت الإغلاق",
-               closeprice="سعر الإغلاق",type="النوع",amount="المبلغ",income="الدخل")%>%mutate(type=case_when(type=="هابط"~"DOWN",TRUE~"UP"))
+qx %>%rename(info="معلومات",profit="الربح",opendate="وقت الفتح",openprice="سعر الافتتاح",closedate="وقت الإغلاق",
+closeprice="سعر الإغلاق",type="النوع",amount="المبلغ",income="الدخل")%>%mutate(type=case_when(type=="هابط"~"DOWN",TRUE~"UP"))
 
 
 qx<-qx %>% separate(profit,"rate",sep ="%" ) 
@@ -44,23 +44,22 @@ qx<-qx %>% separate(info,"currencies",sep =" ")
 qx<-qx %>% filter(as.Date(opendate)>="2024-06-29") 
 
 qx<-
-  qx %>% mutate(date=as.Date(opendate),years= year(opendate),
-                quarters=paste("Q",quarter(opendate),sep=""),months=format(as.Date(opendate),"%b"),
-                weekn=format(as.Date(opendate),'%V'),
-                month_week=paste(format(as.Date(opendate),"%b"),
-                                 format(as.Date(opendate),"%V"),sep="-"),
-                net=case_when(income>0 ~ income-amount,TRUE ~ amount*-1),
-                gain_n=ifelse(income>0,1,0),loss_n=ifelse(income==0,1,0),
-                Rounds = case_when(as.Date(opendate)>"2024-07-20" ~ "R2" ,TRUE ~ "R1"),
-                hours =hour(as.POSIXct(opendate)),
-                minuts=  minute((as.POSIXct(opendate))),monthn=month(opendate))%>% 
-  mutate(hours=case_when(hours==0 ~ 24,TRUE ~ hours))%>% 
-  mutate(time_ranges=case_when(hours >=9 & hours <15 ~ "9AM-15PM",
-                               hours >= 15 & hours <21 ~ "15PM-21Pm",
-                               hours >=21 & hours<=24 ~ "21PM-3AM",
-                               hours>=1 & hours<3 ~ "21PM-3AM",TRUE ~ "3AM-9AM"),
-         days=weekdays(as.Date(opendate))) %>% 
-  select(- c(ID,opendate,closedate,closeprice,openprice)) 
+qx %>% mutate(date=as.Date(opendate),years= year(opendate),
+quarters=paste("Q",quarter(opendate),sep=""),months=format(as.Date(opendate),"%b"),
+weekn=format(as.Date(opendate),'%V'),
+month_week=paste(format(as.Date(opendate),"%b"),
+format(as.Date(opendate),"%V"),sep="-"),
+net=case_when(income>0 ~ income-amount,TRUE ~ amount*-1),
+gain_n=ifelse(income>0,1,0),loss_n=ifelse(income==0,1,0),
+Rounds = case_when(as.Date(opendate)>"2024-07-20" ~ "R2",as.Date(opendate)>'2024-08-01' ~ 'R3',TRUE ~ "R1"), hours =hour(as.POSIXct(opendate)),
+minuts=  minute((as.POSIXct(opendate))),monthn=month(opendate))%>% 
+mutate(hours=case_when(hours==0 ~ 24,TRUE ~ hours))%>% 
+mutate(time_ranges=case_when(hours >=9 & hours <15 ~ "9AM-15PM",
+hours >= 15 & hours <21 ~ "15PM-21Pm",
+hours >=21 & hours<=24 ~ "21PM-3AM",
+hours>=1 & hours<3 ~ "21PM-3AM",TRUE ~ "3AM-9AM"),
+days=weekdays(as.Date(opendate))) %>% 
+select(- c(ID,opendate,closedate,closeprice,openprice)) 
 
 
 qx<-
@@ -75,42 +74,37 @@ qx<-wallet %>% inner_join(qx,by="Rounds")
 
 qx<-qx %>% separate(currencies,c("code","codee"),sep = "/")
 
-codee<-
-  qx %>% select(codee) %>% unique()
+codee<- qx %>% select(codee) %>% unique()
 
+code<- qx %>% select(code) %>% unique()
 
-code<-
-  qx %>% select(code) %>% unique()
-
-
-qx<-
-  countries %>% inner_join(codee,by="codee") %>% 
-  select(codee,currency) %>%rename(codee_currency=currency)  %>% inner_join(qx,by="codee") 
-
+qx<-countries %>% inner_join(codee,by="codee") %>% 
+select(codee,currency) %>%rename(codee_currency=currency)  %>% inner_join(qx,by="codee") 
 
 qx<-
   countries %>% inner_join(code,by="code") %>% 
   select(code,currency) %>%rename(code_currency=currency)  %>% inner_join(qx,by="code")
 
 qx<-
-  qx %>% mutate(pairs=paste(codee,code,sep="|"),
-                countries_pairs=paste(codee_currency,code_currency,sep = "|")) %>% select(- c(1:4)) 
+qx %>% mutate(pairs=paste(codee,code,sep="|"),
+countries_pairs=paste(codee_currency,code_currency,sep = "|")) %>% select(- c(1:4)) 
+
 #------------------------------------------------------------------------------------------------------
 
 main<-
-  qx %>% group_by(Rounds,date) %>% summarize(n=n()) %>% group_by(Rounds) %>% summarize(days=n()) %>% inner_join(qx,by="Rounds") %>%  group_by(Rounds,days=days.x) %>% 
-  summarize(trades=n(),gain_n=sum(gain_n),loss_n=sum(loss_n),profits =sum(net)) %>% 
-  inner_join(wallet,by="Rounds") %>% 
-  mutate(pct =profits/amount)  %>%mutate(performance=
-  ifelse(gain_n/trades<0.5,(loss_n/trades)*-1,gain_n/trades))  %>% 
-  select(c(1,2,7,6,8,3,5,4,9)) %>% mutate(Balance=round(cumsum(profits)+amount,2))
+qx %>% group_by(Rounds,date) %>% summarize(n=n()) %>% group_by(Rounds) %>% summarize(days=n()) %>% inner_join(qx,by="Rounds") %>%  group_by(Rounds,days=days.x) %>% 
+summarize(trades=n(),gain_n=sum(gain_n),loss_n=sum(loss_n),profits =sum(net)) %>% 
+inner_join(wallet,by="Rounds") %>% 
+mutate(pct =profits/amount)  %>%mutate(performance=
+ifelse(gain_n/trades<0.5,(loss_n/trades)*-1,gain_n/trades))  %>% 
+select(c(1,2,7,6,8,3,5,4,9)) %>% mutate(Balance=round(cumsum(profits)+amount,2))
 
 
 main_dt<-
-  main %>% datatable(class = "hover row-borders",
-                     extensions =list(Buttons=TRUE) ,options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"))) %>% 
-  formatPercentage(columns = c(5,9),digits = 2) %>% 
-  formatCurrency(columns = c(3,4),digits = 2)
+main %>%rename_with(.fn = toupper,.cols = everything())%>% datatable(class = "hover row-borders",
+extensions =list(Buttons=TRUE) ,options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"))) %>% 
+formatPercentage(columns = c(5,9),digits = 2) %>% 
+formatCurrency(columns = c(3,4),digits = 2)
 
 
 #----------------------------------------------------------------------------------------
@@ -120,20 +114,17 @@ pivot_wider(id_cols =c(Rounds,month_week) ,names_from = days,
 values_from =profit ,values_fill = FALSE) %>%adorn_totals("col") %>% 
 separate(month_week,c("month","weekn"),sep="-")%>% arrange(weekn,by_group=TRUE)%>% 
 mutate(month_week=paste(month,weekn,sep="-")) %>% select(1,12,4:11) %>%
-inner_join(wallet,by="Rounds") %>%
-mutate(pct=Total/amount,Profit_Balance=round(cumsum(Total),2)) %>% 
-select(- c(11) )%>%
-select(Rounds,month_week,Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Total,Profit_Balance,pct) 
+inner_join(wallet,by="Rounds") %>%mutate(pct=Total/amount)%>% 
+select(- c(11) )%>%select(Rounds,month_week,Saturday,Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Total,pct) 
 
 
 month_week_totals_dt<-
-  month_week_totals %>% 
-  datatable(class = "hover row-border strip",
-            extensions = list(Buttons=TRUE,RowGroup=TRUE),
-            options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
-                           rowGroup=list(dataSrc=1),
-                           columnDefs=list(list(className="dt-center",targets=1:11),list(visible=FALSE,targets=1)))) %>% 
-  formatCurrency(columns = c(3:11),digits = 2) %>% formatPercentage(columns =12 ,digits = 2)
+month_week_totals%>%rename_with(.fn = toupper,.cols = everything()) %>% 
+datatable(class = "hover row-border strip",
+extensions = list(Buttons=TRUE,RowGroup=TRUE),
+options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),rowGroup=list(dataSrc=1),
+columnDefs=list(list(className="dt-center",targets=1:11),list(visible=FALSE,targets=1)))) %>% 
+formatCurrency(columns = c(3:10),digits = 2) %>% formatPercentage(columns =11 ,digits = 2)
 
 
 month_week_totals_chart<-
@@ -146,13 +137,12 @@ daily_total_trades<-
 qx %>% group_by(Rounds,date) %>% 
 summarize(Avg_Rate=round(mean(as.numeric(rate))),Trade=n(),Gain=sum(gain_n),Loss=sum(loss_n),
 PCT_Trade=round(ifelse(sum(gain_n)/n()<0.5,sum(loss_n)/n()*-1,sum(gain_n)/n()),2),
-Profit=sum(net)) %>% inner_join(wallet,by="Rounds") %>% mutate(PCT=Profit/amount,
-Profit_Balance=cumsum(Profit))%>%  
-arrange(date,by_group=FALSE) %>% select(-9)
+Profit=sum(net)) %>% inner_join(wallet,by="Rounds") %>%
+mutate(PCT=Profit/amount) %>% mutate(Profit_Balance=ifelse(cumsum(Profit)<0 ,(amount + cumsum(Profit)),(cumsum(Profit)+amount)))%>%arrange(date,by_group=FALSE) %>% select(-9)
 
 
 daily_total_trades_dt<-
-daily_total_trades %>% datatable(filter = "top",class = "hover row-border strip",
+daily_total_trades %>%rename_with(.fn = toupper,.cols = everything()) %>%  datatable(filter = "top",class = "hover row-border strip",
 extensions = list(Buttons=TRUE,RowGroup=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),rowGroup=list(dataSrc=1),
 columnDefs=list(list(className="dt-center",targets=1:9),list(visible=FALSE,targets=1)))) %>% 
@@ -160,32 +150,39 @@ formatPercentage(columns = c(7,9),digits = 2) %>% formatCurrency(columns =c(8,10
 
 
 daily_total_trades_chart<-
-daily_total_trades %>% group_by(date=as.POSIXct(date)) %>% summarize(profits=round(sum(Profit),2)) %>% 
-ggplot(aes(x=date,y=profits))+geom_line(colour = "#2c3e50")+geom_point()+
+daily_total_trades %>% group_by(date=as.POSIXct(date)) %>% summarize(profits=round(sum(Profit),2)) %>% ggplot(aes(x=date,y=profits))+geom_line(colour = "#2c3e50")+geom_point()+
 geom_smooth(method =  "lm",se = FALSE,color="#27ae60")+
 scale_x_datetime(date_breaks = "1 day",date_labels ="%d-%b" )+
-theme_bw()+
-labs(x="",y="",title = "Daily Profts",
+theme_bw()+ labs(x="",y="",title = "Daily Profts",
 subtitle = paste0("Profits: ",sum(qx$net)," / ","Days: ",nrow(daily_total_trades)," / ",
 "Avg_Rates: ",paste0(format(mean(as.numeric(qx$rate )),digits = 3),"%")))+
 geom_text(aes(label=profits),size=3.4,color="black",nudge_x = 0.2,nudge_y = 0.6)+
 theme(axis.text.x = element_text(face = "bold",size = 9,color="black",angle = 90),
 axis.text.y = element_text(face = "bold",size = 9,color="black"))
 
+
+
+
+
+Daily_Search<-
+qx %>% select(Rounds,date,rate,type,income,amount.y,amount.x,net,trade_status,pairs,days,time_ranges) %>% rename(currencies=pairs,amount=amount.y) %>%arrange(date) %>%mutate() %>%   rename_with(.fn = toupper,.cols = everything()) 
+
+Daily_Search_dt<-
+Daily_Search %>% datatable(filter = "top",class="hover row-border", extensions = list(Buttons=TRUE,RowGroup=TRUE),options =list(dom="Bfrtip",buttons=c("csv","excel","pdf"),rowGroup=list(dataSrc=c(1)),columnDefs=list(list(className="dt-center",targets=1:11),list(visible=FALSE,targets=1)))) %>% formatCurrency(columns =c(5:8) ,digits = 2)
+
+
 #----------------------------------------------------------------------------------------
 pairs_totals<-
 qx %>% group_by(pairs) %>% summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),
 performance=ifelse(sum(gain_n)/n()<0.5,(sum(loss_n)/n())*-1,sum(gain_n)/n()),
-Profits=sum(net),PCT=sum(net)/sum(qx$net)) 
-
-
+Profits=sum(net)) 
 
 pairs_totals_dt<-  
-pairs_totals %>%adorn_totals("row") %>%
+pairs_totals%>%rename_with(.fn = toupper,.cols = everything()) %>%adorn_totals("row") %>%
 datatable(class="hover row-border strip",
 extensions = list(Buttons=TRUE),options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
-columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
-formatPercentage(columns =c(5,7),digits = 2) %>% formatCurrency(columns = 6,digits = 2) 
+columnDefs=list(list(className="dt-center",targets=1:6)))) %>% 
+formatPercentage(columns =c(5),digits = 2) %>% formatCurrency(columns = 6,digits = 2) 
 
 pairs_totals_chart<-
 pairs_totals %>% ggplot(aes(x="",y=Profits,fill=pairs))+
@@ -200,27 +197,25 @@ timeranges_totals<-
 qx %>% group_by(time_ranges) %>%
 summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),
 performance=ifelse(sum(gain_n)/n()<0.5,(sum(loss_n)/n())*-1,sum(gain_n)/n()),
-Profits=sum(net),PCT=sum(net)/sum(qx$net))
+Profits=sum(net))
 
 timeranges_totals_dt<-
-timeranges_totals %>% adorn_totals("row") %>%
+timeranges_totals%>%rename_with(.fn = toupper,.cols = everything()) %>% adorn_totals("row") %>%
 datatable(class="hover row-border",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
-columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
-formatPercentage(columns = c(5,7),digits = 2) %>% formatCurrency(columns = 6,digits = 2)
+columnDefs=list(list(className="dt-center",targets=1:6)))) %>% 
+formatPercentage(columns = c(5),digits = 2) %>% formatCurrency(columns = 6,digits = 2)
 
 timeranges_totals_chart<- 
 timeranges_totals %>% ggplot(aes(x="",y=Profits,fill=time_ranges))+geom_bar(stat = "identity")+coord_polar(theta = "y")+theme_void()+geom_text(aes(label=Profits),size=4,color="white",position = position_stack(vjust =0.5),fontface = "bold")+scale_fill_brewer(palette = "Set1")
 
-
 #----------------------------------------------------------------------------------------
-
 
 Order_Status_totals<-
 qx %>% group_by(trade_status) %>%summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),Gain_pct=sum(gain_n)/n(),Loss_pct=sum(loss_n)/n(),Profits=round(sum(net),2))
 
 Order_Status_totals_dt<-
-Order_Status_totals %>% adorn_totals("row")%>% 
+Order_Status_totals%>%rename_with(.fn = toupper,.cols = everything()) %>% adorn_totals("row")%>% 
 datatable(width = "fit-content",class="hover row-border",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
@@ -231,11 +226,7 @@ Order_Status_totals_chart<-
 Order_Status_totals %>% ggplot(aes(x="",y=Profits,fill=trade_status))+geom_bar(stat =  "identity")+coord_polar(theta="y")+
 theme_void()+geom_text(aes(label=Profits),size=5,color="white",position = position_stack(vjust = 0.5))+scale_fill_brewer(palette = "Set1")
 
-
-
 #----------------------------------------------------------------------------------------
-
-
 pctg<-(sum(main$gain_n)/sum(main$trades))*100
 
 pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
@@ -244,97 +235,97 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 ```
 
 
-# Main
+# MAIN
 ## row{data-width=10}
 ### Profits
 ```{r}
 valueBox(value =round(sum(qx$net),2) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#a4b0be" )
 ```
 
-### Days
+### DAYS
 ```{r}
 valueBox(value =sum(main$days) ,caption = "Days",icon = "fa fa-calendar",color = "#a4b0be")
 ```
-### Trades
+### TRADES
 ```{r}
 valueBox(value =nrow(qx) ,caption = "Trades",icon = "fa fa-bar-chart" ,color = "#a4b0be")
 ```
-### Shots
+### SHOTS
 ```{r}
 valueBox(value = sum(qx %>% filter(trade_status=="Shot") %>% summarize(round(sum(net),2))),caption = ,icon ="fa fa-times" ,color ="#a4b0be" )
 ```
-### Sep
+### SEP
 ```{r}
 valueBox(value = sum(qx %>% filter(trade_status=="Sep") %>% summarize(round(sum(net),2))),caption = ,icon ="fa fa-star"  ,color ="#a4b0be" )
 ```
 
-### Gain_Trades
+### GAIN_TRADES
 ```{r}
 gauge(value =pctg ,min =0 ,max =100 ,sectors = gaugeSectors(success =c(55,70) ,warning = c(40,50),danger =c(25,35) ,colors = "darkgreen"),symbol = "%",label = "Gain Trades")
 ```
 
-### Loss_Trades
+### LOSS_TRADES
 ```{r}
 gauge(value = pctl,min = -100,max =0 ,sectors =gaugeSectors(success = c(-10,-25),warning =c(-30,-45) ,danger =c(-50,-60) ,colors ="red" ) ,symbol = "%",label = "Loss Trades")
 ```
 
 
 ## row{data-hight=990}
-### Rounds
+### ROUNDS
 ```{r}
 main_dt
 ```
 
-# Month_weeks
+# MONTH_WEEKS
 ## row{.tabset}
-### Week_Profits 
+### WEEK_PROFITS 
 ```{r}
 month_week_totals_dt
 ```
 
-### Weeks_chart
+### WEEK_CHART
 ```{r}
 ggplotly(month_week_totals_chart,width=1000)
 ```
  
-### Daily_Profits 
+### DAILY_PROFITS 
 ```{r}
  daily_total_trades_dt
 ```
 
  
-### Daily_Chart
+### DAILY_CHART
 ```{r}
 ggplotly(daily_total_trades_chart,width = 1000)
 ```
 
-# Currencies
+# CURRENCIES
 ## row{data-hight=600,.tabset}
-### Pairs
+### PAIRS
 ```{r}
 pairs_totals_dt
 ```
   
-### Chart
+### CHART
 ```{r}
 pairs_totals_chart
 ```
 
-# Time_Ranges
+# TIME_RANGES
 ## row{data-hight=600,.tabset}
-### Table
+### TBL
 ```{r}
 timeranges_totals_dt
 ```
 
 
-### Chart
+### CHART
 ```{r}
 timeranges_totals_chart
 ```
 
 
-# Trades_Status
+# TRADES_STATUS
 
 ## row{data-hight=500,.tabset}
 ### TBL
@@ -343,8 +334,14 @@ Order_Status_totals_dt
 ```
 
 
-### Chary
+### CHART
 ```{r}
 Order_Status_totals_chart
+```
+
+# SEARCH
+### TBL
+```{r}
+Daily_Search_dt
 ```
 
