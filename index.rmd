@@ -165,10 +165,10 @@ axis.text.y = element_text(face = "bold",size = 9,color="black"))
 
 
 Daily_Search<-
-qx %>% select(Rounds,date,rate,type,income,amount.y,amount.x,net,trade_status,pairs,days,time_ranges) %>% rename(currencies=pairs,amount=amount.y) %>%arrange(date) %>%mutate() %>%   rename_with(.fn = toupper,.cols = everything()) 
+qx %>% select(Rounds,date,rate,type,income,amount.y,net,trade_status,pairs,days,time_ranges) %>% rename(currencies=pairs,amount=amount.y) %>%arrange(date) %>%mutate() %>%   rename_with(.fn = toupper,.cols = everything()) 
 
 Daily_Search_dt<-
-Daily_Search %>% datatable(filter = "top",class="hover row-border", extensions = list(Buttons=TRUE,RowGroup=TRUE),options =list(dom="Bfrtip",buttons=c("csv","excel","pdf"),rowGroup=list(dataSrc=c(1)),columnDefs=list(list(className="dt-center",targets=1:11),list(visible=FALSE,targets=1)))) %>% formatCurrency(columns =c(5:8) ,digits = 2)
+Daily_Search %>% datatable(filter = "top",class="hover row-border", extensions = list(Buttons=TRUE,RowGroup=TRUE),options =list(dom="Bfrtip",buttons=c("csv","excel","pdf"),rowGroup=list(dataSrc=c(1)),columnDefs=list(list(className="dt-center",targets=1:10),list(visible=FALSE,targets=1)))) %>% formatCurrency(columns =c(5:7) ,digits = 2)
 
 
 #----------------------------------------------------------------------------------------
@@ -215,8 +215,8 @@ Order_Status_totals<-
 qx %>% group_by(trade_status) %>%summarize(Trades=n(),Gain=sum(gain_n),Loss=sum(loss_n),Gain_pct=sum(gain_n)/n(),Loss_pct=sum(loss_n)/n(),Profits=round(sum(net),2))
 
 Order_Status_totals_dt<-
-Order_Status_totals%>%rename_with(.fn = toupper,.cols = everything()) %>% adorn_totals("row")%>% 
-datatable(width = "fit-content",class="hover row-border",extensions = list(Buttons=TRUE),
+Order_Status_totals %>% rename(Status=trade_status)%>%rename_with(.fn = toupper,.cols = everything()) %>% adorn_totals("row")%>% 
+datatable(class="hover row-border",extensions = list(Buttons=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),
 columnDefs=list(list(className="dt-center",targets=1:7)))) %>% 
 formatCurrency(columns = 7,digits = 2) %>% formatPercentage(columns = c(5,6),digits = 2)
@@ -327,7 +327,7 @@ timeranges_totals_chart
 
 # TRADES_STATUS
 
-## row{data-hight=500,.tabset}
+## row{data-hight=700,.tabset}
 ### TBL
 ```{r}
 Order_Status_totals_dt
