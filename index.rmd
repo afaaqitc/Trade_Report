@@ -51,7 +51,9 @@ month_week=paste(format(as.Date(opendate),"%b"),
 format(as.Date(opendate),"%V"),sep="-"),
 net=case_when(income>0 ~ income-amount,TRUE ~ amount*-1),
 gain_n=ifelse(income>0,1,0),loss_n=ifelse(income==0,1,0),
-Rounds = case_when(as.Date(opendate)>"2024-07-20" ~ "R2",as.Date(opendate)>'2024-08-01' ~ 'R3',TRUE ~ "R1"), hours =hour(as.POSIXct(opendate)),
+Rounds = 
+ifelse(as.Date(opendate)>="2024-08-01" , "R3",
+ifelse( as.Date(opendate)>"2024-07-20" , 'R2', "R1")), hours =hour(as.POSIXct(opendate)),
 minuts=  minute((as.POSIXct(opendate))),monthn=month(opendate))%>% 
 mutate(hours=case_when(hours==0 ~ 24,TRUE ~ hours))%>% 
 mutate(time_ranges=case_when(hours >=9 & hours <15 ~ "9AM-15PM",
