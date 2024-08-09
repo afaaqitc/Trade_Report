@@ -99,7 +99,7 @@ summarize(trades=n(),gain_n=sum(gain_n),loss_n=sum(loss_n),profits =sum(net)) %>
 inner_join(wallet,by="Rounds") %>% 
 mutate(pct =profits/amount)  %>%mutate(performance=
 ifelse(gain_n/trades<0.5,(loss_n/trades)*-1,gain_n/trades))  %>% 
-select(c(1,2,7,6,8,3,5,4,9)) %>% mutate(Balance=round(cumsum(profits)+amount,2))
+select(c(1,2,7,6,8,3,5,4,9))
 
 
 main_dt<-
@@ -140,7 +140,7 @@ qx %>% group_by(Rounds,date) %>%
 summarize(Avg_Rate=round(mean(as.numeric(rate))),Trade=n(),Gain=sum(gain_n),Loss=sum(loss_n),
 PCT_Trade=round(ifelse(sum(gain_n)/n()<0.5,sum(loss_n)/n()*-1,sum(gain_n)/n()),2),
 Profit=sum(net)) %>% inner_join(wallet,by="Rounds") %>%
-mutate(PCT=Profit/amount) %>% mutate(Profit_Balance=ifelse(cumsum(Profit)<0 ,(amount + cumsum(Profit)),(cumsum(Profit)+amount)))%>%arrange(date,by_group=FALSE) %>% select(-9)
+mutate(PCT=Profit/amount) %>%arrange(date,by_group=FALSE) %>% select(-9)
 
 
 daily_total_trades_dt<-
@@ -148,7 +148,7 @@ daily_total_trades %>%rename_with(.fn = toupper,.cols = everything()) %>%  datat
 extensions = list(Buttons=TRUE,RowGroup=TRUE),
 options = list(dom="Bfrtip",buttons=c("excel","csv","pdf"),rowGroup=list(dataSrc=1),
 columnDefs=list(list(className="dt-center",targets=1:9),list(visible=FALSE,targets=1)))) %>% 
-formatPercentage(columns = c(7,9),digits = 2) %>% formatCurrency(columns =c(8,10) ,digits = 2)
+formatPercentage(columns = c(7,9),digits = 2) %>% formatCurrency(columns =c(8) ,digits = 2)
 
 
 daily_total_trades_chart<-
