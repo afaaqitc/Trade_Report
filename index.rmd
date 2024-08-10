@@ -241,7 +241,7 @@ pctl<-((sum(main$loss_n)/sum(main$trades))*100)*-1
 ## row{data-width=10}
 ### Profits
 ```{r}
-valueBox(value =round(sum(qx$net),2) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#a4b0be" )
+valueBox(value =ifelse(round(sum(qx$net),2)<0,0,round(sum(qx$net),2)) ,caption ="Profits" ,icon ="fa fa-money" ,color ="#a4b0be" )
 ```
 
 ### DAYS
