@@ -52,13 +52,9 @@ format(as.Date(opendate),"%V"),sep="-"),
 net=case_when(income>0 ~ income-amount,TRUE ~ amount*-1),
 gain_n=ifelse(income>0,1,0),loss_n=ifelse(income==0,1,0),
 Rounds = 
-ifelse(as.Date(opendate)>"2024-10-15" , "R8",
-ifelse(as.Date(opendate)>="2024-10-1" , "R7",
-ifelse(as.Date(opendate)>"2024-09-15" , "R6",
-ifelse(as.Date(opendate)>="2024-09-1" , "R5",
-ifelse(as.Date(opendate)>"2024-08-15" , "R4",
-ifelse(as.Date(opendate)>="2024-08-01" , "R3",
-ifelse( as.Date(opendate)>"2024-07-20" , 'R2', "R1"))))))),
+ifelse(as.Date(opendate)>"2024-08-15" ,"R4",
+ifelse(as.Date(opendate)>="2024-08-01","R3",
+ifelse( as.Date(opendate)>"2024-07-20" , "R2","R1"))),
 hours =hour(as.POSIXct(opendate)),
 minuts=  minute((as.POSIXct(opendate))),monthn=month(opendate))%>% 
 mutate(hours=case_when(hours==0 ~ 24,TRUE ~ hours))%>% 
@@ -72,7 +68,7 @@ select(- c(ID,opendate,closedate,closeprice,openprice))
 
 qx<-
 qx %>% mutate(lhours=lag(hours),lminutes=lag(minuts)) %>% 
-mutate(trade_status=case_when(hours==lhours&lminutes-minuts<10 ~ "Shot",TRUE ~ "Sep"))
+mutate(trade_status=case_when(hours==lhours & lminutes-minuts<2 ~ "Shot",TRUE ~ "Sep"))
 
 qx<-wallet %>% inner_join(qx,by="Rounds")
 
@@ -176,7 +172,7 @@ Daily_Search<-
 qx %>% select(Rounds,date,rate,type,income,amount.y,net,trade_status,pairs,days,time_ranges) %>% rename(currencies=pairs,amount=amount.y) %>%arrange(date) %>%mutate() %>%   rename_with(.fn = toupper,.cols = everything()) 
 
 Daily_Search_dt<-
-Daily_Search %>% datatable(filter = "top",class="hover row-border", extensions = list(Buttons=TRUE,RowGroup=TRUE),options =list(dom="Bfrtip",buttons=c("csv","excel","pdf"),rowGroup=list(dataSrc=c(1)),columnDefs=list(list(className="dt-center",targets=1:10),list(visible=FALSE,targets=1)))) %>% formatCurrency(columns =c(5:7) ,digits = 2)
+Daily_Search %>% datatable(filter = "top",class="hover row-border", extensions = list(Buttons=TRUE,RowGroup=TRUE),options =list(dom="Bfrtip",buttons=c("csv","excel","pdf"),rowGroup=list(dataSrc=c(1)),columnDefs=list(list(className="dt-center",targets=1:10)))) %>% formatCurrency(columns =c(5:7) ,digits = 2)
 
 
 #----------------------------------------------------------------------------------------
